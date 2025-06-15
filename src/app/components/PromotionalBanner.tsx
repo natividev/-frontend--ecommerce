@@ -48,7 +48,7 @@ export default function PromotionalBanner({ banners }: { banners: Banner[] }) {
         style={{ objectFit: "cover" }}
       />
 
-      <div className="absolute inset-0 bg-black/40 flex flex-col justify-center items-start p-6 text-white">
+      <div className="absolute inset-0 flex flex-col justify-center items-start p-6 text-white">
         <h1 className="text-3xl font-bold">{banner.titulo}</h1>
         {banner.subtitulo && <p className="mt-1">{banner.subtitulo}</p>}
         {banner.ctaUrl && (
