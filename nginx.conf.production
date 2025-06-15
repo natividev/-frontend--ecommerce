@@ -2,17 +2,24 @@ server {
     listen 80;
     server_name _;
 
-    # return 301 https://$host$request_uri;
-
-    location / {
-        proxy_pass         http://ecommerce-app:4000;
+    # proxy para las imágenes de Strapi
+    location /uploads/ {
+        proxy_pass         http://154.53.37.70:1337;
         proxy_http_version 1.1;
-
         proxy_set_header   Host $host;
         proxy_set_header   X-Real-IP $remote_addr;
         proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header   X-Forwarded-Proto $scheme;
+    }
 
+    # proxy para tu Next.js (ERP)
+    location / {
+        proxy_pass         http://ecommerce-app:4000;
+        proxy_http_version 1.1;
+        proxy_set_header   Host $host;
+        proxy_set_header   X-Real-IP $remote_addr;
+        proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $scheme;
         proxy_set_header   Upgrade $http_upgrade;
         proxy_set_header   Connection "upgrade";
     }
