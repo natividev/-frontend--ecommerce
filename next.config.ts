@@ -2,7 +2,6 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: {
-    domains: ["154.53.37.70"],
     remotePatterns: [
       {
         protocol: "http",
@@ -11,6 +10,7 @@ const nextConfig: NextConfig = {
         pathname: "/uploads/**",
       },
     ],
+    unoptimized: true,
   },
 };
 
