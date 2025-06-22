@@ -1,17 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image"; // ← Importa Image
 import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
+import { getStripe } from "@/utils/stripe";
 
 export default function CartPage() {
-  const { items, removeItem, clearCart } = useCart();
+  const { items, removeItem, clearCart, updateItemQuantity } = useCart();
   const [loading, setLoading] = useState(false);
 
-  const total = items.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
+  const total = items.reduce((sum, it) => sum + it.price * it.quantity, 0);
 
   const handleCheckout = async () => {
     setLoading(true);
@@ -21,14 +20,18 @@ export default function CartPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ items }),
       });
-      const { sessionUrl } = await res.json();
-      if (sessionUrl) {
-        window.location.href = sessionUrl;
-      } else {
+      const { sessionId } = await res.json();
+      if (!sessionId) {
         toast.error("No se pudo crear la sesión de pago");
+        setLoading(false);
+        return;
       }
-    } catch {
-      toast.error("Error de red al procesar el pago");
+      const stripe = await getStripe();
+      const { error } = await stripe!.redirectToCheckout({ sessionId });
+      if (error) throw error;
+    } catch (err) {
+      console.error(err);
+      toast.error("Error al procesar el pago");
     } finally {
       setLoading(false);
     }
@@ -43,28 +46,71 @@ export default function CartPage() {
       <h1 className="text-2xl font-bold">Tu Carrito</h1>
 
       <ul className="space-y-4">
-        {items.map((item) => (
-          <li
-            key={item.id}
-            className="flex justify-between items-center border-b pb-2"
-          >
-            <div>
-              <p className="font-medium">{item.productName}</p>
-              <p className="text-sm text-gray-600">Cantidad: {item.quantity}</p>
-            </div>
-            <div className="text-right">
-              <p>${(item.price * item.quantity).toFixed(2)}</p>
-              <button
-                onClick={() => removeItem(item.id)}
-                className="text-red-500 text-sm hover:underline"
-              >
-                Eliminar
-              </button>
-            </div>
-          </li>
-        ))}
+        {items.map((item) => {
+          // construyo la URL completa de la imagen
+          const imgSrc = item.imageUrl
+            ? `${process.env.NEXT_PUBLIC_API_URL}${item.imageUrl}`
+            : "/placeholder.png";
+
+          return (
+            <li
+              key={item.id}
+              className="flex items-center border-b pb-4 space-x-4"
+            >
+              {/* Miniatura */}
+              <div className="w-20 h-20 relative flex-shrink-0">
+                <Image
+                  src={imgSrc}
+                  alt={item.productName}
+                  fill
+                  style={{ objectFit: "contain" }}
+                  className="rounded"
+                />
+              </div>
+
+              {/* Detalle */}
+              <div className="flex-1">
+                <p className="font-medium">{item.productName}</p>
+                <p className="text-sm text-gray-600">
+                  Precio unitario: ${item.price.toFixed(2)}
+                </p>
+              </div>
+
+              {/* Controles de cantidad */}
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => updateItemQuantity(item.id, item.quantity - 1)}
+                  className="w-8 h-8 flex items-center justify-center bg-zinc-200 rounded"
+                >
+                  −
+                </button>
+                <span className="w-8 text-center">{item.quantity}</span>
+                <button
+                  onClick={() => updateItemQuantity(item.id, item.quantity + 1)}
+                  className="w-8 h-8 flex items-center justify-center bg-zinc-200 rounded"
+                >
+                  +
+                </button>
+              </div>
+
+              {/* Subtotal y eliminar */}
+              <div className="text-right space-y-1">
+                <p className="font-semibold">
+                  ${(item.price * item.quantity).toFixed(2)}
+                </p>
+                <button
+                  onClick={() => removeItem(item.id)}
+                  className="text-red-500 text-sm hover:underline"
+                >
+                  Eliminar
+                </button>
+              </div>
+            </li>
+          );
+        })}
       </ul>
 
+      {/* Total y Checkout */}
       <div className="flex justify-between items-center mt-6">
         <p className="text-lg font-semibold">Total: ${total.toFixed(2)}</p>
         <button

@@ -1,3 +1,4 @@
+// context/CartContext.tsx
 "use client";
 
 import { createContext, useContext, useState, ReactNode } from "react";
@@ -5,6 +6,7 @@ import { IProduct } from "@/interfaces/IProducts";
 
 interface CartItem extends IProduct {
   quantity: number;
+  imageUrl?: string;
 }
 
 interface CartContextValue {
@@ -12,6 +14,7 @@ interface CartContextValue {
   addItem: (product: IProduct) => void;
   removeItem: (id: number) => void;
   clearCart: () => void;
+  updateItemQuantity: (id: number, quantity: number) => void;
   totalItems: number;
 }
 
@@ -22,28 +25,56 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const addItem = (product: IProduct) => {
     setItems((prev) => {
-      const exists = prev.find((item) => item.id === product.id);
+      // ruta relativa que Strapi devuelve, p. ej. "/uploads/imagen.png"
+      const imgPath = product.images?.[0]?.url;
+      console.log("imgPath", imgPath);
+
+      const exists = prev.find((it) => it.id === product.id);
       if (exists) {
-        return prev.map((item) =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
+        return prev.map((it) =>
+          it.id === product.id ? { ...it, quantity: it.quantity + 1 } : it
         );
       }
-      return [...prev, { ...product, quantity: 1 }];
+      return [
+        ...prev,
+        {
+          ...product,
+          quantity: 1,
+          // guardamos la ruta relativa
+          imageUrl: imgPath,
+        },
+      ];
     });
   };
 
   const removeItem = (id: number) =>
-    setItems((prev) => prev.filter((item) => item.id !== id));
+    setItems((prev) => prev.filter((it) => it.id !== id));
 
   const clearCart = () => setItems([]);
 
-  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+  const updateItemQuantity = (id: number, quantity: number) => {
+    if (quantity <= 0) {
+      // si la cantidad baja a cero, lo eliminamos
+      removeItem(id);
+    } else {
+      setItems((prev) =>
+        prev.map((it) => (it.id === id ? { ...it, quantity } : it))
+      );
+    }
+  };
+
+  const totalItems = items.reduce((sum, it) => sum + it.quantity, 0);
 
   return (
     <CartContext.Provider
-      value={{ items, addItem, removeItem, clearCart, totalItems }}
+      value={{
+        items,
+        addItem,
+        removeItem,
+        clearCart,
+        updateItemQuantity,
+        totalItems,
+      }}
     >
       {children}
     </CartContext.Provider>
