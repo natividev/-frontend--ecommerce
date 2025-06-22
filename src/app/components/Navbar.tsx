@@ -9,9 +9,11 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
+import { useCart } from "@/context/CartContext"; // ← Importa tu hook
 
 export default function Navbar() {
   const router = useRouter();
+  const { totalItems } = useCart(); // ← Extrae totalItems
 
   return (
     <nav className="bg-white shadow">
@@ -21,7 +23,6 @@ export default function Navbar() {
         </Link>
 
         <div className="flex items-center space-x-4">
-          {/* Menú de Productos */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline">Productos</Button>
@@ -39,7 +40,6 @@ export default function Navbar() {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Menú de Categorías */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline">Categorías</Button>
@@ -50,17 +50,24 @@ export default function Navbar() {
               >
                 📋 Listado
               </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => router.push("/categories")}
-              >
+              <DropdownMenuItem onClick={() => router.push("/categories")}>
                 ➕ Crear
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Acciones generales */}
           <Button variant="outline">Sign Up</Button>
-          <Button>Cart</Button>
+
+          <Link href="/cart">
+            <Button>
+              Cart
+              {totalItems > 0 && (
+                <span className="ml-1 inline-block bg-red-500 text-white text-xs font-medium px-2 py-0.5 rounded-full">
+                  {totalItems}
+                </span>
+              )}
+            </Button>
+          </Link>
         </div>
       </div>
     </nav>

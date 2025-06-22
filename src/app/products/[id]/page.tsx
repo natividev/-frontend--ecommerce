@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import ProductGrid from "@/app/components/ProductGrid";
+import AddToCartButton from "@/app/components/AddToCartButton";
 
 interface Category {
   id: number;
@@ -86,9 +87,7 @@ export default async function ProductDetailPage({
             )}
           </div>
 
-          <button className="mt-8 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg text-lg font-medium shadow transition self-start">
-            Agregar al carrito
-          </button>
+          <AddToCartButton product={product} />
         </div>
       </div>
 
