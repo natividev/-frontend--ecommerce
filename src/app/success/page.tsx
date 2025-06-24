@@ -1,6 +1,18 @@
+"use client";
+
+import { useEffect } from "react";
 import Link from "next/link";
+import { useCart } from "@/context/CartContext";
 
 export default function SuccessPage() {
+  const { clearCart } = useCart();
+
+  useEffect(() => {
+    // Ejecutar una sola vez, sin depender de clearCart directamente
+    clearCart();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="p-8 max-w-xl mx-auto text-center space-y-6">
       <h1 className="text-3xl font-bold">¡Gracias por tu compra!</h1>

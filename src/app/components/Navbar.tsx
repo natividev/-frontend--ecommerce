@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useCart } from "@/context/CartContext";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -10,23 +10,12 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { useCart } from "@/context/CartContext";
+import { useAuth } from "../context/AuthContext";
 
 export default function Navbar() {
   const router = useRouter();
   const { totalItems } = useCart();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    setIsLoggedIn(!!token);
-  }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    setIsLoggedIn(false);
-    router.push("/auth/login");
-  };
+  const { isLoggedIn, logout } = useAuth();
 
   return (
     <nav className="bg-white shadow">
@@ -75,7 +64,7 @@ export default function Navbar() {
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <Button onClick={handleLogout} variant="destructive">
+              <Button onClick={logout} variant="destructive">
                 Cerrar sesión
               </Button>
             </>
