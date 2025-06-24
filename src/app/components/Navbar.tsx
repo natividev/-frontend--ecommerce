@@ -1,7 +1,8 @@
 "use client";
 
-import Link from "next/link";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,11 +10,23 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { useCart } from "@/context/CartContext"; // ← Importa tu hook
+import { useCart } from "@/context/CartContext";
 
 export default function Navbar() {
   const router = useRouter();
-  const { totalItems } = useCart(); // ← Extrae totalItems
+  const { totalItems } = useCart();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    setIsLoggedIn(!!token);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setIsLoggedIn(false);
+    router.push("/auth/login");
+  };
 
   return (
     <nav className="bg-white shadow">
@@ -23,44 +36,69 @@ export default function Navbar() {
         </Link>
 
         <div className="flex items-center space-x-4">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline">Productos</Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => router.push("/products/admin")}>
-                📋 Listado
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => router.push("/products")}>
-                ➕ Crear
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => router.push("/products/create")}>
-                🛠️ Administrar
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {isLoggedIn ? (
+            <>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline">Productos</Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={() => router.push("/products/admin")}
+                  >
+                    📋 Listado
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push("/products")}>
+                    ➕ Crear
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => router.push("/products/create")}
+                  >
+                    🛠️ Administrar
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline">Categorías</Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem
-                onClick={() => router.push("/categories/admin")}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline">Categorías</Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={() => router.push("/categories/admin")}
+                  >
+                    📋 Listado
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push("/categories")}>
+                    ➕ Crear
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <Button onClick={handleLogout} variant="destructive">
+                Cerrar sesión
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                onClick={() => router.push("/auth/login")}
+                variant="outline"
               >
-                📋 Listado
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => router.push("/categories")}>
-                ➕ Crear
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <Button variant="outline">Sign Up</Button>
+                Iniciar sesión
+              </Button>
+              <Button
+                onClick={() => router.push("/auth/register")}
+                variant="default"
+              >
+                Crear cuenta
+              </Button>
+            </>
+          )}
 
           <Link href="/cart">
             <Button>
-              Cart
+              🛒 Carrito
               {totalItems > 0 && (
                 <span className="ml-1 inline-block bg-red-500 text-white text-xs font-medium px-2 py-0.5 rounded-full">
                   {totalItems}

@@ -8,6 +8,13 @@ export default function AddToCartButton({ product }: { product: IProduct }) {
   const { addItem, totalItems } = useCart();
 
   const handle = () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      toast.error("Debes iniciar sesión para agregar al carrito");
+      return;
+    }
+
     addItem(product);
     toast.success(`🛒 Agregaste "${product.productName}" (${totalItems + 1})`);
   };

@@ -95,6 +95,7 @@ export default function CategoryAdminPanel() {
             <tr key={c.id} className="border-t">
               <td className="p-2">
                 {c.mainImage?.url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={`${process.env.NEXT_PUBLIC_API_URL}${c.mainImage.url}`}
                     alt={c.categoryName}

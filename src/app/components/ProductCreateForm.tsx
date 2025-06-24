@@ -8,6 +8,13 @@ interface Category {
   id: number;
   categoryName: string;
 }
+interface ProductPayload {
+  productName: string;
+  description: string;
+  price: number;
+  isFeatured: boolean;
+  category?: number;
+}
 
 export default function ProductCreateForm() {
   const router = useRouter();
@@ -26,6 +33,7 @@ export default function ProductCreateForm() {
         );
         const data = await res.json();
         setCategories(data);
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err) {
         toast.error("Error cargando categorías");
       }
@@ -36,7 +44,7 @@ export default function ProductCreateForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const dataPayload: any = {
+    const dataPayload: ProductPayload = {
       productName,
       description,
       price,
@@ -120,6 +128,7 @@ export default function ProductCreateForm() {
         className="w-full"
       />
       {image && (
+        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={URL.createObjectURL(image)}
           alt="Vista previa"

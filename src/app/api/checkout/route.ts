@@ -1,6 +1,12 @@
 // app/api/checkout/route.ts
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
+interface CheckoutItem {
+  productName: string;
+  imageUrl?: string;
+  price: number;
+  quantity: number;
+}
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 export async function POST(request: Request) {
@@ -8,8 +14,7 @@ export async function POST(request: Request) {
   const origin = process.env.NEXT_PUBLIC_API_URL!;
   const frontendUrl = process.env.NEXT_PUBLIC_BASE_URL!;
 
-  const line_items = items.map((item: any) => {
-    // imageUrl ya viene de tu contexto (p.ej. "/uploads/…png")
+  const line_items = (items as CheckoutItem[]).map((item) => {
     const fullImageUrl = item.imageUrl
       ? `${origin}${item.imageUrl}`
       : undefined;
